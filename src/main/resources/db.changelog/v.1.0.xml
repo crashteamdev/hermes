@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.8.xsd">
+
+    <changeSet id="createCrmTable" author="Ruslan">
+
+        <createTable tableName="crm">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="crm_pkey"/>
+            </column>
+            <column name="user_id" type="VARCHAR"/>
+            <column name="first_name" type="VARCHAR"/>
+            <column name="middle_name" type="VARCHAR"/>
+            <column name="last_name" type="VARCHAR"/>
+            <column name="full_name" type="VARCHAR"/>
+            <column name="phone" type="BIGINT"/>
+            <column name="email" type="VARCHAR"/>
+            <column name="inn" type="BIGINT"/>
+            <column name="crm_type" type="VARCHAR"/>
+            <column name="crm_external_id" type="VARCHAR"/>
+            <column name="verification" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <createSequence sequenceName="crm_id_seq" startValue="1" incrementBy="1"/>
+
+        <addUniqueConstraint
+                columnNames="phone"
+                tableName="crm"
+                constraintName="unique_phone"/>
+
+        <addUniqueConstraint
+                columnNames="user_id"
+                tableName="crm"
+                constraintName="unique_user_id"/>
+
+        <addUniqueConstraint
+                columnNames="crm_external_id"
+                tableName="crm"
+                constraintName="unique_crm_external_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>
