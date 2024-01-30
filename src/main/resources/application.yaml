@@ -1,1 +1,20 @@
+app:
+  integration:
+    oko-crm:
+      url: https://api.okocrm.com/v2/
+      token: 0510599d43fb005883494861667b8c8c:ea6cb0d691bf40cc82f976fe8d761efe
+    sms-aero:
+      url: https://rns572@mail.ru:GYS6A6xfVA1-zV1TC1HJrQ8xeaPApHnI@gate.smsaero.ru/v2/
 
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/crm
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:db.changelog/main.xml
+    enabled: true
