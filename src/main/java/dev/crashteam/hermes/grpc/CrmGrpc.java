@@ -29,15 +29,31 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
 
     @Override
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
-        leadService.createLead(GrpcMapper.map(request));
-        responseObserver.onNext(CreateLeadResponse.newBuilder().build());
+        try {
+            leadService.createLead(GrpcMapper.map(request));
+            responseObserver.onNext(CreateLeadResponse.newBuilder().build());
+        } catch (Exception e) {
+            responseObserver.onNext(CreateLeadResponse.newBuilder()
+                    .setErrorResponse(CreateLeadResponse.ErrorResponse.newBuilder()
+                            .setErrorCode(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS)
+                            .build())
+                    .build());
+        }
         responseObserver.onCompleted();
     }
 
     @Override
     public void getUserContactInfo(GetUserContactInfoRequest request, StreamObserver<GetUserContactInfoResponse> responseObserver) {
         Contact contact = contactService.getContact(request.getUserId());
-        responseObserver.onNext(GrpcMapper.mapToUserContact(contact));
+        if (contact != null) {
+            responseObserver.onNext(GrpcMapper.mapToUserContact(contact));
+        } else {
+            responseObserver.onNext(GetUserContactInfoResponse.newBuilder()
+                    .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
+                            .setErrorCode(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_NOT_FOUND)
+                            .build())
+                    .build());
+        }
         responseObserver.onCompleted();
     }
 
@@ -54,14 +70,22 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                             .build())
                     .build());
         } else if (request.hasApproveUpdateContactInfoPayload()) {
-            String approveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
+            String sentApproveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
             Contact contact = contactService.getContact(request.getUserId());
-            if (contact.getApproveCode().equals(approveCode)) {
+            String expectedApproveCode = contact.getApproveCode();
+            if (expectedApproveCode.equals(sentApproveCode)) {
                 contactService.verifyContact(userId);
                 responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                         .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
                                 .setUserContact(GrpcMapper.map(contact))
                                 .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_VERIFIED)
+                                .build())
+                        .build());
+            } else {
+                responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
+                        .setErrorResponse(UpdateUserContactInfoResponse.ErrorResponse.newBuilder()
+                                .setErrorCode(UpdateUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_INVALID_APPROVAL_CODE)
+                                .setDescription("Код подтверждения: %s. Ожидаемый код: %s".formatted(sentApproveCode, expectedApproveCode))
                                 .build())
                         .build());
             }
