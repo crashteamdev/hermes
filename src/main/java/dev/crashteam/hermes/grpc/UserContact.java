@@ -21,7 +21,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 @Slf4j
 @GrpcService
 @RequiredArgsConstructor
-public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
+public class UserContact extends CrmServiceGrpc.CrmServiceImplBase {
 
     private final LeadService leadService;
     private final ContactService contactService;
