@@ -1,22 +1,21 @@
 package dev.crashteam.hermes.mapper;
 
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.domain.Crm;
-import dev.crashteam.hermes.model.dto.contact.ContactResponse;
+import dev.crashteam.hermes.model.domain.CrmDomain;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
+@UtilityClass
 public class CrmMapper {
 
-    public Crm mapLeadToCrm(LeadRequest source, int crmExternalId) {
+    public static CrmDomain mapLeadToCrm(LeadRequest source, int crmExternalId) {
         LeadRequest.Contact contact = source.getContact();
         String firstName = contact.getName();
         long phone = Long.parseLong(contact.getPhone());
 
-        Crm crm = new Crm();
+        CrmDomain crm = new CrmDomain();
         crm.setCrmExternalId(String.valueOf(crmExternalId));
         crm.setFirstName(firstName);
         crm.setPhone(phone);
@@ -24,18 +23,20 @@ public class CrmMapper {
         return crm;
     }
 
-    public ContactResponse mapCrmToContactResponse(Crm crm) {
-        ContactResponse contact = new ContactResponse(crm.getEmail(), crm.getPhone());
+    public static Contact mapCrmToContactResponse(CrmDomain crm) {
+        Contact contact = new Contact();
+        contact.setPhone(crm.getPhone());
+        contact.setEmail(crm.getEmail());
         if (crm.getInn() != null) {
-            contact.setInn(crm.getInn().toString());
+            contact.setInn(crm.getInn());
         } else {
-            contact.setInn("");
-            log.info("ИНН не найден.");
+            log.info("INN not found");
         }
+        contact.setVerification(crm.isVerification());
         return contact;
     }
 
-    public Contact mapCrmToContact(Crm crm) {
+    public static Contact mapCrmToContact(CrmDomain crm) {
         Contact contact = new Contact();
         contact.setEmail(crm.getEmail());
         contact.setPhone(crm.getPhone());
@@ -45,8 +46,8 @@ public class CrmMapper {
         return contact;
     }
 
-    public Crm mapContactToCrm(Contact contact) {
-        Crm crm = new Crm();
+    public static CrmDomain mapContactToCrm(Contact contact) {
+        CrmDomain crm = new CrmDomain();
         crm.setEmail(contact.getEmail());
         crm.setPhone(contact.getPhone());
         if (contact.getInn() != null) {

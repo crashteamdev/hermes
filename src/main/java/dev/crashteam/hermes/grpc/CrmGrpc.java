@@ -10,34 +10,34 @@ import dev.crashteam.crm.UpdateUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoState;
 import dev.crashteam.hermes.mapper.GrpcMapper;
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.dto.contact.ContactResponse;
 import dev.crashteam.hermes.service.contact.ContactService;
 import dev.crashteam.hermes.service.lead.LeadService;
 import dev.crashteam.hermes.service.sms.SmsService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+@Slf4j
 @GrpcService
 @RequiredArgsConstructor
 public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
 
-    private final GrpcMapper grpcMapper;
     private final LeadService leadService;
     private final ContactService contactService;
     private final SmsService smsService;
 
     @Override
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
-        leadService.createLead(grpcMapper.map(request));
+        leadService.createLead(GrpcMapper.map(request));
         responseObserver.onNext(CreateLeadResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void getUserContactInfo(GetUserContactInfoRequest request, StreamObserver<GetUserContactInfoResponse> responseObserver) {
-        ContactResponse contact = contactService.getContact(request.getUserId());
-        responseObserver.onNext(grpcMapper.map(contact));
+        Contact contact = contactService.getContact(request.getUserId());
+        responseObserver.onNext(GrpcMapper.mapToUserContact(contact));
         responseObserver.onCompleted();
     }
 
@@ -45,9 +45,10 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     public void updateUserContactInfo(UpdateUserContactInfoRequest request, StreamObserver<UpdateUserContactInfoResponse> responseObserver) {
         String userId = request.getUserId();
         Contact contact = new Contact();
-        String smsCode = smsService.generateSmsCode();
+        String smsCode = null;
         if (request.hasInitialUpdateContactInfoPayload()) {
-            contact = contactService.updateContact(userId, grpcMapper.map(request.getInitialUpdateContactInfoPayload()));
+            contact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
+            smsCode = smsService.generateSmsCode();
             smsService.smsSend(contact.getPhone(), smsCode);
             responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                     .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
@@ -57,9 +58,10 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
         } else if (request.hasApproveUpdateContactInfoPayload()) {
             String approveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
             if (smsCode.equals(approveCode)) {
+                contactService.verifyContact(userId);
                 responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                         .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
-                                .setUserContact(grpcMapper.map(contact))
+                                .setUserContact(GrpcMapper.map(contact))
                                 .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_VERIFIED)
                                 .build())
                         .build());

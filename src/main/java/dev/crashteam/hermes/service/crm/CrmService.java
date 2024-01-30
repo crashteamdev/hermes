@@ -1,7 +1,6 @@
 package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.dto.contact.ContactResponse;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 
@@ -13,12 +12,12 @@ public interface CrmService {
 
     Integer createContact(List<LeadRequest.Contact> contact);
 
-    LeadResponse createLead(LeadRequest leadRequest);
+    LeadResponse createLead(LeadRequest leadRequest, int crmExternalId);
 
-    void saveLead(LeadRequest leadRequest, int crmExternalId);
-
-    ContactResponse getContact(String userId);
+    Contact getContact(String userId);
 
     Contact updateContact(String userId, Contact contact);
+
+    void verifyContact(String userId);
 
 }

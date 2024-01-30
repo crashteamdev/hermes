@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LeadRequest {
 
+    public LeadRequest(String name, Contact contact) {
+        this.name = name;
+        this.contact = contact;
+    }
+
     @JsonProperty("pipeline_id")
     private int pipelineId;
     @JsonProperty("stages_id")

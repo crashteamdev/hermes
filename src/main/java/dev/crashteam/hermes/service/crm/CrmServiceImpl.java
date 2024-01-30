@@ -1,10 +1,10 @@
 package dev.crashteam.hermes.service.crm;
 
+import dev.crashteam.hermes.component.OkoProperties;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.domain.Crm;
+import dev.crashteam.hermes.model.domain.CrmDomain;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
-import dev.crashteam.hermes.model.dto.contact.ContactResponse;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 import dev.crashteam.hermes.repository.CrmRepository;
@@ -26,44 +26,40 @@ public class CrmServiceImpl implements CrmService {
 
     private final CrmRepository crmRepository;
     private final OkoCrmClient okoCrmClient;
-    private final CrmMapper crmMapper;
+    private final OkoProperties okoProperties;
 
-    private static final Map<String, String> HEADERS = Map.of(
+    private final Map<String, String> headers = Map.of(
             "Accept", MediaType.APPLICATION_JSON_VALUE,
-            "Authorization", "Bearer 0510599d43fb005883494861667b8c8c:ea6cb0d691bf40cc82f976fe8d761efe"
+            "Authorization", "Bearer " + okoProperties.getToken()
     );
 
     @Override
     public Integer createContact(String firstName, long phone) {
-        return okoCrmClient.createContact(HEADERS, new ContactRequest(firstName, phone)).getId();
+        return okoCrmClient.createContact(headers, new ContactRequest(firstName, phone)).getId();
     }
 
     @Override
     public Integer createContact(List<LeadRequest.Contact> contact) {
         LeadRequest.Contact contactRequest = contact.stream().findFirst().get();
-        return okoCrmClient.createContact(HEADERS, new ContactRequest(contactRequest.getName(), Long.parseLong(contactRequest.getPhone()))).getId();
-    }
-
-    @Override
-    public LeadResponse createLead(LeadRequest leadRequest) {
-        return okoCrmClient.createLead(HEADERS, leadRequest);
+        return okoCrmClient.createContact(headers, new ContactRequest(contactRequest.getName(), Long.parseLong(contactRequest.getPhone()))).getId();
     }
 
     @Transactional
     @Override
-    public void saveLead(LeadRequest leadRequest, int crmExternalId) {
-        Crm save = crmRepository.save(crmMapper.mapLeadToCrm(leadRequest, crmExternalId));
-        log.info("Новая запись в БД:[{}]", save);
+    public LeadResponse createLead(LeadRequest leadRequest, int crmExternalId) {
+        CrmDomain save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
+        log.info("New lead in the DB:[{}]", save);
+        return okoCrmClient.createLead(headers, leadRequest);
     }
 
     @Transactional
     @Override
-    public ContactResponse getContact(String userId) {
-        Optional<Crm> byUserId = crmRepository.findByUserId(userId);
+    public Contact getContact(String userId) {
+        Optional<CrmDomain> byUserId = crmRepository.findByUserId(userId);
         if (byUserId.isPresent()) {
-            return crmMapper.mapCrmToContactResponse(byUserId.get());
+            return CrmMapper.mapCrmToContactResponse(byUserId.get());
         } else {
-            log.info("Пользователь с id:{} не найден", userId);
+            log.info("Contact with user_id:{} not found", userId);
             return null;
         }
     }
@@ -71,15 +67,24 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public Contact updateContact(String userId, Contact contact) {
-        Crm crmToSave = crmRepository.findByUserId(userId).get();
+        CrmDomain crmToSave = crmRepository.findByUserId(userId).get();
         crmToSave.setEmail(contact.getEmail());
         crmToSave.setPhone(contact.getPhone());
         if (contact.getInn() != null) {
             crmToSave.setInn(contact.getInn());
         }
-        Crm crm = crmRepository.save(crmToSave);
-        log.info("Обновлена запись в БД [{}]", crm);
-        return crmMapper.mapCrmToContact(crm);
+        CrmDomain crm = crmRepository.save(crmToSave);
+        log.info("Update contact in the DB [{}]", crm);
+        return CrmMapper.mapCrmToContact(crm);
+    }
+
+    @Transactional
+    @Override
+    public void verifyContact(String userId) {
+        CrmDomain crm = crmRepository.findByUserId(userId).get();
+        crm.setVerification(true);
+        crmRepository.save(crm);
+        log.info("Contact with user_id [Id: {}] verified", userId);
     }
 
 }

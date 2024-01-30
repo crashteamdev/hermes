@@ -23,6 +23,7 @@ public class SmsServiceImpl implements SmsService {
     @Override
     public void smsSend(Long number, String senderName, String text) {
         smsAeroClient.smsSend(new SmsRequest(number.toString(), senderName, text));
+        log.info("Code {} has been sent to the number {}", text, number);
     }
 
     @Override
