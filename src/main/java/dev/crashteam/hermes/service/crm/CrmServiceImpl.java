@@ -1,9 +1,8 @@
 package dev.crashteam.hermes.service.crm;
 
-import dev.crashteam.hermes.component.OkoProperties;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.domain.CrmDomain;
+import dev.crashteam.hermes.model.domain.CrmUser;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
@@ -11,6 +10,7 @@ import dev.crashteam.hermes.repository.CrmRepository;
 import dev.crashteam.hermes.service.feign.OkoCrmClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +26,13 @@ public class CrmServiceImpl implements CrmService {
 
     private final CrmRepository crmRepository;
     private final OkoCrmClient okoCrmClient;
-    private final OkoProperties okoProperties;
+
+    @Value("${app.integration.oko-crm.token}")
+    private String token;
 
     private final Map<String, String> headers = Map.of(
             "Accept", MediaType.APPLICATION_JSON_VALUE,
-            "Authorization", "Bearer " + okoProperties.getToken()
+            "Authorization", "Bearer " + token
     );
 
     @Override
@@ -47,7 +49,7 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public LeadResponse createLead(LeadRequest leadRequest, int crmExternalId) {
-        CrmDomain save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
+        CrmUser save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
         log.info("New lead in the DB:[{}]", save);
         return okoCrmClient.createLead(headers, leadRequest);
     }
@@ -55,7 +57,7 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public Contact getContact(String userId) {
-        Optional<CrmDomain> byUserId = crmRepository.findByUserId(userId);
+        Optional<CrmUser> byUserId = crmRepository.findByUserId(userId);
         if (byUserId.isPresent()) {
             return CrmMapper.mapCrmToContactResponse(byUserId.get());
         } else {
@@ -67,13 +69,13 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public Contact updateContact(String userId, Contact contact) {
-        CrmDomain crmToSave = crmRepository.findByUserId(userId).get();
+        CrmUser crmToSave = crmRepository.findByUserId(userId).get();
         crmToSave.setEmail(contact.getEmail());
         crmToSave.setPhone(contact.getPhone());
         if (contact.getInn() != null) {
             crmToSave.setInn(contact.getInn());
         }
-        CrmDomain crm = crmRepository.save(crmToSave);
+        CrmUser crm = crmRepository.save(crmToSave);
         log.info("Update contact in the DB [{}]", crm);
         return CrmMapper.mapCrmToContact(crm);
     }
@@ -81,10 +83,18 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public void verifyContact(String userId) {
-        CrmDomain crm = crmRepository.findByUserId(userId).get();
+        CrmUser crm = crmRepository.findByUserId(userId).get();
         crm.setVerification(true);
         crmRepository.save(crm);
         log.info("Contact with user_id [Id: {}] verified", userId);
+    }
+
+    @Transactional
+    @Override
+    public void saveApproveCode(String approveCode) {
+        CrmUser crmUser = new CrmUser();
+        crmUser.setApproveCode(approveCode);
+        crmRepository.save(crmUser);
     }
 
 }

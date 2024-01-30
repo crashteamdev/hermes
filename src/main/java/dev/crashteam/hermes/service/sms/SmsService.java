@@ -5,5 +5,5 @@ public interface SmsService {
 
     void smsSend(Long number, String senderName, String text);
 
-    String generateSmsCode();
+    String generateApproveCode();
 }

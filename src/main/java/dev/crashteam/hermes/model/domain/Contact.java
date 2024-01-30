@@ -18,5 +18,6 @@ public class Contact {
     private String email;
     private Long inn;
     private boolean verification;
+    private String approveCode;
 
 }

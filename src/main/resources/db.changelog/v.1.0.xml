@@ -7,7 +7,7 @@
 
     <changeSet id="createCrmTable" author="Ruslan">
 
-        <createTable tableName="crm">
+        <createTable tableName="crm_user">
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="crm_pkey"/>
             </column>
@@ -22,23 +22,48 @@
             <column name="crm_type" type="VARCHAR"/>
             <column name="crm_external_id" type="VARCHAR"/>
             <column name="verification" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="approve_code" type="VARCHAR"/>
         </createTable>
 
         <createSequence sequenceName="crm_id_seq" startValue="1" incrementBy="1"/>
 
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="phone"/>
+
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="email"/>
+
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="first_name"/>
+
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="user_id"/>
+
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="crm_type"/>
+
+        <addNotNullConstraint
+                tableName="crm_user"
+                columnName="verification"/>
+
         <addUniqueConstraint
                 columnNames="phone"
-                tableName="crm"
+                tableName="crm_user"
                 constraintName="unique_phone"/>
 
         <addUniqueConstraint
                 columnNames="user_id"
-                tableName="crm"
+                tableName="crm_user"
                 constraintName="unique_user_id"/>
 
         <addUniqueConstraint
                 columnNames="crm_external_id"
-                tableName="crm"
+                tableName="crm_user"
                 constraintName="unique_crm_external_id"/>
 
     </changeSet>

@@ -1,7 +1,7 @@
 package dev.crashteam.hermes.mapper;
 
 import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.domain.CrmDomain;
+import dev.crashteam.hermes.model.domain.CrmUser;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class CrmMapper {
 
-    public static CrmDomain mapLeadToCrm(LeadRequest source, int crmExternalId) {
+    public static CrmUser mapLeadToCrm(LeadRequest source, int crmExternalId) {
         LeadRequest.Contact contact = source.getContact();
         String firstName = contact.getName();
         long phone = Long.parseLong(contact.getPhone());
 
-        CrmDomain crm = new CrmDomain();
+        CrmUser crm = new CrmUser();
         crm.setCrmExternalId(String.valueOf(crmExternalId));
         crm.setFirstName(firstName);
         crm.setPhone(phone);
@@ -23,20 +23,17 @@ public class CrmMapper {
         return crm;
     }
 
-    public static Contact mapCrmToContactResponse(CrmDomain crm) {
+    public static Contact mapCrmToContactResponse(CrmUser crm) {
         Contact contact = new Contact();
         contact.setPhone(crm.getPhone());
         contact.setEmail(crm.getEmail());
-        if (crm.getInn() != null) {
-            contact.setInn(crm.getInn());
-        } else {
-            log.info("INN not found");
-        }
+        contact.setInn(crm.getInn());
+        contact.setApproveCode(crm.getApproveCode());
         contact.setVerification(crm.isVerification());
         return contact;
     }
 
-    public static Contact mapCrmToContact(CrmDomain crm) {
+    public static Contact mapCrmToContact(CrmUser crm) {
         Contact contact = new Contact();
         contact.setEmail(crm.getEmail());
         contact.setPhone(crm.getPhone());
@@ -46,8 +43,8 @@ public class CrmMapper {
         return contact;
     }
 
-    public static CrmDomain mapContactToCrm(Contact contact) {
-        CrmDomain crm = new CrmDomain();
+    public static CrmUser mapContactToCrm(Contact contact) {
+        CrmUser crm = new CrmUser();
         crm.setEmail(contact.getEmail());
         crm.setPhone(contact.getPhone());
         if (contact.getInn() != null) {

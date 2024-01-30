@@ -20,4 +20,5 @@ public interface CrmService {
 
     void verifyContact(String userId);
 
+    void saveApproveCode(String approveCode);
 }

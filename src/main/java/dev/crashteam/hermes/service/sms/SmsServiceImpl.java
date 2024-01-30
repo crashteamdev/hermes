@@ -1,6 +1,7 @@
 package dev.crashteam.hermes.service.sms;
 
 import dev.crashteam.hermes.model.dto.sms.SmsRequest;
+import dev.crashteam.hermes.service.crm.CrmService;
 import dev.crashteam.hermes.service.feign.SmsAeroClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class SmsServiceImpl implements SmsService {
 
+    private final CrmService crmService;
     private final SmsAeroClient smsAeroClient;
 
     @Override
@@ -27,12 +29,12 @@ public class SmsServiceImpl implements SmsService {
     }
 
     @Override
-    public String generateSmsCode() {
+    public String generateApproveCode() {
         int min = 100000;
         int max = 999999;
-        int smsCode = new Random().nextInt((max - min) + 1) + min;
-
-        return String.valueOf(smsCode);
+        int approveCode = new Random().nextInt((max - min) + 1) + min;
+        crmService.saveApproveCode(Integer.toString(approveCode));
+        return Integer.toString(approveCode);
     }
 
 }

@@ -16,10 +16,10 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "crm")
+@Table(name = "crm_user")
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrmDomain {
+public class CrmUser {
 
     @Id
     @SequenceGenerator(name = "crmIdSeq", sequenceName = "crm_id_seq", allocationSize = 1)
@@ -37,5 +37,6 @@ public class CrmDomain {
     private CrmType crmType;
     private String crmExternalId;
     private boolean verification;
+    private String approveCode;
 
 }

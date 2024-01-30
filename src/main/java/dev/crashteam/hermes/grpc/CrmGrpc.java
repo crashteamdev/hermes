@@ -44,11 +44,9 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     @Override
     public void updateUserContactInfo(UpdateUserContactInfoRequest request, StreamObserver<UpdateUserContactInfoResponse> responseObserver) {
         String userId = request.getUserId();
-        Contact contact = new Contact();
-        String smsCode = null;
         if (request.hasInitialUpdateContactInfoPayload()) {
-            contact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
-            smsCode = smsService.generateSmsCode();
+            Contact contact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
+            String smsCode = smsService.generateApproveCode();
             smsService.smsSend(contact.getPhone(), smsCode);
             responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                     .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
@@ -57,7 +55,8 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                     .build());
         } else if (request.hasApproveUpdateContactInfoPayload()) {
             String approveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
-            if (smsCode.equals(approveCode)) {
+            Contact contact = contactService.getContact(request.getUserId());
+            if (contact.getApproveCode().equals(approveCode)) {
                 contactService.verifyContact(userId);
                 responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                         .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
