@@ -1,8 +1,8 @@
 package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.mapper.CrmMapper;
-import dev.crashteam.hermes.model.domain.Contact;
-import dev.crashteam.hermes.model.domain.CrmUser;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
+import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
@@ -49,15 +49,15 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public LeadResponse createLead(LeadRequest leadRequest, int crmExternalId) {
-        CrmUser save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
+        CrmUserEntity save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
         log.info("New lead in the DB:[{}]", save);
         return okoCrmClient.createLead(headers, leadRequest);
     }
 
     @Transactional
     @Override
-    public Contact getContact(String userId) {
-        Optional<CrmUser> byUserId = crmRepository.findByUserId(userId);
+    public UserContactEntity getContact(String userId) {
+        Optional<CrmUserEntity> byUserId = crmRepository.findByUserId(userId);
         if (byUserId.isPresent()) {
             return CrmMapper.mapCrmToContactResponse(byUserId.get());
         } else {
@@ -68,14 +68,14 @@ public class CrmServiceImpl implements CrmService {
 
     @Transactional
     @Override
-    public Contact updateContact(String userId, Contact contact) {
-        CrmUser crmToSave = crmRepository.findByUserId(userId).get();
-        crmToSave.setEmail(contact.getEmail());
-        crmToSave.setPhone(contact.getPhone());
-        if (contact.getInn() != null) {
-            crmToSave.setInn(contact.getInn());
+    public UserContactEntity updateContact(String userId, UserContactEntity userContact) {
+        CrmUserEntity crmToSave = crmRepository.findByUserId(userId).get();
+        crmToSave.setEmail(userContact.getEmail());
+        crmToSave.setPhone(userContact.getPhone());
+        if (userContact.getInn() != null) {
+            crmToSave.setInn(userContact.getInn());
         }
-        CrmUser crm = crmRepository.save(crmToSave);
+        CrmUserEntity crm = crmRepository.save(crmToSave);
         log.info("Update contact in the DB [{}]", crm);
         return CrmMapper.mapCrmToContact(crm);
     }
@@ -83,7 +83,7 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public void verifyContact(String userId) {
-        CrmUser crm = crmRepository.findByUserId(userId).get();
+        CrmUserEntity crm = crmRepository.findByUserId(userId).get();
         crm.setVerification(true);
         crmRepository.save(crm);
         log.info("Contact with user_id [Id: {}] verified", userId);
@@ -92,7 +92,7 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public void saveApproveCode(String approveCode) {
-        CrmUser crmUser = new CrmUser();
+        CrmUserEntity crmUser = new CrmUserEntity();
         crmUser.setApproveCode(approveCode);
         crmRepository.save(crmUser);
     }

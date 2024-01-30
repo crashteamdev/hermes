@@ -4,8 +4,7 @@ import dev.crashteam.crm.CreateLeadRequest;
 import dev.crashteam.crm.GetUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoState;
-import dev.crashteam.crm.UserContact;
-import dev.crashteam.hermes.model.domain.Contact;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -20,37 +19,37 @@ public class GrpcMapper {
         return new LeadRequest("Демо", contact);
     }
 
-    public static GetUserContactInfoResponse mapToUserContact(Contact contact) {
+    public static GetUserContactInfoResponse mapToUserContact(UserContactEntity userContact) {
         return GetUserContactInfoResponse.newBuilder()
                 .setSuccessResponse(GetUserContactInfoResponse.SuccessResponse.newBuilder()
-                        .setUserContact(UserContact.newBuilder()
-                                .setEmail(contact.getEmail() != null ? contact.getEmail() : "")
-                                .setPhone(contact.getPhone())
-                                .setInn(contact.getInn() != null ? contact.getInn().toString() : "")
+                        .setUserContact(dev.crashteam.crm.UserContact.newBuilder()
+                                .setEmail(userContact.getEmail() != null ? userContact.getEmail() : "")
+                                .setPhone(userContact.getPhone())
+                                .setInn(userContact.getInn() != null ? userContact.getInn().toString() : "")
                                 .build())
                         .setUserContactInfoState(
-                                contact.isVerification() ? UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_VERIFIED
+                                userContact.isVerification() ? UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_VERIFIED
                                         : UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_NOT_VERIFIED
                         )
                         .build())
                 .build();
     }
 
-    public static Contact map(UpdateUserContactInfoRequest.InitialUpdateContactInfoPayload contactInfoPayload) {
-        Contact contact = new Contact();
-        contact.setEmail(contactInfoPayload.getEmail());
-        contact.setPhone(contactInfoPayload.getPhoneNumber());
+    public static UserContactEntity map(UpdateUserContactInfoRequest.InitialUpdateContactInfoPayload contactInfoPayload) {
+        UserContactEntity userContact = new UserContactEntity();
+        userContact.setEmail(contactInfoPayload.getEmail());
+        userContact.setPhone(contactInfoPayload.getPhoneNumber());
         if (!contactInfoPayload.getInn().isBlank()) {
-            contact.setInn(Long.parseLong(contactInfoPayload.getInn()));
+            userContact.setInn(Long.parseLong(contactInfoPayload.getInn()));
         }
-        return contact;
+        return userContact;
     }
 
-    public static UserContact map(Contact contact) {
-        return UserContact.newBuilder()
-                .setEmail(contact.getEmail() != null ? contact.getEmail() : "")
-                .setPhone(contact.getPhone())
-                .setInn(contact.getInn() != null ? contact.getInn().toString() : "")
+    public static dev.crashteam.crm.UserContact map(UserContactEntity userContact) {
+        return dev.crashteam.crm.UserContact.newBuilder()
+                .setEmail(userContact.getEmail() != null ? userContact.getEmail() : "")
+                .setPhone(userContact.getPhone())
+                .setInn(userContact.getInn() != null ? userContact.getInn().toString() : "")
                 .build();
     }
 

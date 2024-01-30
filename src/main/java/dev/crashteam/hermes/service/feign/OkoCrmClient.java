@@ -1,7 +1,7 @@
 package dev.crashteam.hermes.service.feign;
 
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
-import dev.crashteam.hermes.model.dto.contact.ContactResp;
+import dev.crashteam.hermes.model.dto.contact.ContactResponse;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
@@ -19,7 +19,7 @@ import java.util.Map;
 public interface OkoCrmClient {
 
     @PostMapping("/contacts")
-    ContactResp createContact(@RequestHeader Map<String, String> header, @RequestBody ContactRequest contact);
+    ContactResponse createContact(@RequestHeader Map<String, String> header, @RequestBody ContactRequest contact);
 
     @PostMapping("/leads")
     LeadResponse createLead(@RequestHeader Map<String, String> header, @RequestBody LeadRequest lead);

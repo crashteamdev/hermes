@@ -1,6 +1,6 @@
 package dev.crashteam.hermes.service.crm;
 
-import dev.crashteam.hermes.model.domain.Contact;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 
@@ -14,9 +14,9 @@ public interface CrmService {
 
     LeadResponse createLead(LeadRequest leadRequest, int crmExternalId);
 
-    Contact getContact(String userId);
+    UserContactEntity getContact(String userId);
 
-    Contact updateContact(String userId, Contact contact);
+    UserContactEntity updateContact(String userId, UserContactEntity userContact);
 
     void verifyContact(String userId);
 

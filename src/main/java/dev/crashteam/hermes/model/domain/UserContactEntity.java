@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Contact {
+public class UserContactEntity {
 
     private String userId;
     private String firstName;

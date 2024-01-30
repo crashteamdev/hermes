@@ -9,7 +9,7 @@ import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoState;
 import dev.crashteam.hermes.mapper.GrpcMapper;
-import dev.crashteam.hermes.model.domain.Contact;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.service.contact.ContactService;
 import dev.crashteam.hermes.service.lead.LeadService;
 import dev.crashteam.hermes.service.sms.SmsService;
@@ -21,7 +21,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 @Slf4j
 @GrpcService
 @RequiredArgsConstructor
-public class UserContact extends CrmServiceGrpc.CrmServiceImplBase {
+public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
 
     private final LeadService leadService;
     private final ContactService contactService;
@@ -44,9 +44,9 @@ public class UserContact extends CrmServiceGrpc.CrmServiceImplBase {
 
     @Override
     public void getUserContactInfo(GetUserContactInfoRequest request, StreamObserver<GetUserContactInfoResponse> responseObserver) {
-        Contact contact = contactService.getContact(request.getUserId());
-        if (contact != null) {
-            responseObserver.onNext(GrpcMapper.mapToUserContact(contact));
+        UserContactEntity userContact = contactService.getContact(request.getUserId());
+        if (userContact != null) {
+            responseObserver.onNext(GrpcMapper.mapToUserContact(userContact));
         } else {
             responseObserver.onNext(GetUserContactInfoResponse.newBuilder()
                     .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
@@ -61,9 +61,9 @@ public class UserContact extends CrmServiceGrpc.CrmServiceImplBase {
     public void updateUserContactInfo(UpdateUserContactInfoRequest request, StreamObserver<UpdateUserContactInfoResponse> responseObserver) {
         String userId = request.getUserId();
         if (request.hasInitialUpdateContactInfoPayload()) {
-            Contact contact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
+            UserContactEntity userContact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
             String smsCode = smsService.generateApproveCode();
-            smsService.smsSend(contact.getPhone(), smsCode);
+            smsService.smsSend(userContact.getPhone(), smsCode);
             responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                     .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
                             .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_NOT_VERIFIED)
@@ -71,13 +71,13 @@ public class UserContact extends CrmServiceGrpc.CrmServiceImplBase {
                     .build());
         } else if (request.hasApproveUpdateContactInfoPayload()) {
             String sentApproveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
-            Contact contact = contactService.getContact(request.getUserId());
-            String expectedApproveCode = contact.getApproveCode();
+            UserContactEntity userContact = contactService.getContact(request.getUserId());
+            String expectedApproveCode = userContact.getApproveCode();
             if (expectedApproveCode.equals(sentApproveCode)) {
                 contactService.verifyContact(userId);
                 responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
                         .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
-                                .setUserContact(GrpcMapper.map(contact))
+                                .setUserContact(GrpcMapper.map(userContact))
                                 .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_VERIFIED)
                                 .build())
                         .build());

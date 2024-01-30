@@ -1,6 +1,6 @@
 package dev.crashteam.hermes.service.contact;
 
-import dev.crashteam.hermes.model.domain.Contact;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.service.crm.CrmService;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +27,13 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact getContact(String userId) {
+    public UserContactEntity getContact(String userId) {
         return crmService.getContact(userId);
     }
 
     @Override
-    public Contact updateContact(String userId, Contact contact) {
-        return crmService.updateContact(userId, contact);
+    public UserContactEntity updateContact(String userId, UserContactEntity userContact) {
+        return crmService.updateContact(userId, userContact);
     }
 
     @Override

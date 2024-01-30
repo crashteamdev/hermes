@@ -19,7 +19,7 @@ import javax.persistence.Table;
 @Table(name = "crm_user")
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrmUser {
+public class CrmUserEntity {
 
     @Id
     @SequenceGenerator(name = "crmIdSeq", sequenceName = "crm_id_seq", allocationSize = 1)
