@@ -109,9 +109,7 @@ public class CrmServiceImpl implements CrmService {
         if (crmToSaveOptional.isPresent()) {
             return crmToSaveOptional.get();
         } else {
-            String contactNotFound = "Contact with user_id:%s not found".formatted(userId);
-            log.info(contactNotFound);
-            throw new ContactNotFoundException(contactNotFound);
+            throw new ContactNotFoundException("Contact with user_id:%s not found".formatted(userId));
         }
     }
 

@@ -56,14 +56,15 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
         } catch (ContactNotFoundException e) {
             responseObserver.onNext(
                     fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_NOT_FOUND, e));
-            log.error("Contact not created");
+            log.error("Contact not created\n" +
+                      "Stack trace: %s".formatted(e));
         } catch (RuntimeException e) {
             responseObserver.onNext(
                     fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
-            log.error("Contact not created");
+            log.error("Contact not created\n" +
+                      "Stack trace: %s".formatted(e));
         }
         responseObserver.onCompleted();
-        log.info("Done get user contact info");
     }
 
     @Override

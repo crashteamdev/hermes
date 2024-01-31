@@ -33,7 +33,6 @@ public class SmsServiceImpl implements SmsService {
         int min = 100000;
         int max = 999999;
         int approveCode = new Random().nextInt((max - min) + 1) + min;
-        log.info("approve code generated");
         crmService.saveApproveCode(Integer.toString(approveCode));
         return Integer.toString(approveCode);
     }

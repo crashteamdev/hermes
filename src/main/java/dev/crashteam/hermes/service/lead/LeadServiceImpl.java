@@ -31,9 +31,7 @@ public class LeadServiceImpl implements LeadService {
             leadRequest.setPipelineId(pipelineId);
             log.info("Received pipeline_id");
         } else {
-            String pipelineIdNotFound = "Pipeline Id not found";
-            log.error(pipelineIdNotFound);
-            throw new PipelineIdNotFoundException(pipelineIdNotFound);
+            throw new PipelineIdNotFoundException("Pipeline Id not found");
         }
 
         Optional<PipelineStagesResponse.Stage> pipelineStage
@@ -44,9 +42,7 @@ public class LeadServiceImpl implements LeadService {
             leadRequest.setStageId(stageId);
             log.info("Received stage_id");
         } else {
-            String stageException = "Stages for pipeline with Id:[%s] not found".formatted(pipelineId);
-            log.error(stageException);
-            throw new PipelineStageNotFound(stageException);
+            throw new PipelineStageNotFound("Stages for pipeline with Id:[%s] not found".formatted(pipelineId));
         }
 
         Integer crmExternalId = contactService.createContact(List.of(leadRequest.getContact()));
