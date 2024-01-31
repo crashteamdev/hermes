@@ -8,6 +8,9 @@ import dev.crashteam.crm.GetUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoState;
+import dev.crashteam.hermes.exception.ContactNotFoundException;
+import dev.crashteam.hermes.exception.LeadAlreadyExistsException;
+import dev.crashteam.hermes.exception.pipeline.PipelineException;
 import dev.crashteam.hermes.mapper.GrpcMapper;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.service.contact.ContactService;
@@ -30,45 +33,57 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     @Override
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
         try {
+            log.info("Start create lead");
             leadService.createLead(GrpcMapper.map(request));
             responseObserver.onNext(CreateLeadResponse.newBuilder().build());
-        } catch (Exception e) {
-            responseObserver.onNext(CreateLeadResponse.newBuilder()
-                    .setErrorResponse(CreateLeadResponse.ErrorResponse.newBuilder()
-                            .setErrorCode(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS)
-                            .build())
-                    .build());
+        } catch (LeadAlreadyExistsException e) {
+            responseObserver.onNext(
+                    fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));
+        } catch (PipelineException e) {
+            responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
+            log.error("Lead not created");
         }
         responseObserver.onCompleted();
+        log.info("Done create lead");
     }
 
     @Override
     public void getUserContactInfo(GetUserContactInfoRequest request, StreamObserver<GetUserContactInfoResponse> responseObserver) {
-        UserContactEntity userContact = contactService.getContact(request.getUserId());
-        if (userContact != null) {
+        try {
+            log.info("Start get user contact info");
+            UserContactEntity userContact = contactService.getContact(request.getUserId());
             responseObserver.onNext(GrpcMapper.mapToUserContact(userContact));
-        } else {
-            responseObserver.onNext(GetUserContactInfoResponse.newBuilder()
-                    .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
-                            .setErrorCode(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_NOT_FOUND)
-                            .build())
-                    .build());
+        } catch (ContactNotFoundException e) {
+            responseObserver.onNext(
+                    fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_NOT_FOUND, e));
+            log.error("Contact not created");
+        } catch (RuntimeException e) {
+            responseObserver.onNext(
+                    fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
+            log.error("Contact not created");
         }
         responseObserver.onCompleted();
+        log.info("Done get user contact info");
     }
 
     @Override
     public void updateUserContactInfo(UpdateUserContactInfoRequest request, StreamObserver<UpdateUserContactInfoResponse> responseObserver) {
         String userId = request.getUserId();
         if (request.hasInitialUpdateContactInfoPayload()) {
-            UserContactEntity userContact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
-            String smsCode = smsService.generateApproveCode();
-            smsService.smsSend(userContact.getPhone(), smsCode);
-            responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
-                    .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
-                            .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_NOT_VERIFIED)
-                            .build())
-                    .build());
+            try {
+                log.info("Start update user contact info");
+                UserContactEntity userContact = contactService.updateContact(userId, GrpcMapper.map(request.getInitialUpdateContactInfoPayload()));
+                String smsCode = smsService.generateApproveCode();
+                smsService.smsSend(userContact.getPhone(), smsCode);
+                responseObserver.onNext(UpdateUserContactInfoResponse.newBuilder()
+                        .setSuccessResponse(UpdateUserContactInfoResponse.SuccessResponse.newBuilder()
+                                .setUpdateUserContactInfoState(UpdateUserContactInfoState.UPDATE_USER_CONTACT_INFO_STATE_NOT_VERIFIED)
+                                .build())
+                        .build());
+            } catch (ContactNotFoundException e) {
+                responseObserver.onNext(
+                        fillUpdateUserContactInfoError(UpdateUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_INVALID_SEQUENCE, e));
+            }
         } else if (request.hasApproveUpdateContactInfoPayload()) {
             String sentApproveCode = request.getApproveUpdateContactInfoPayload().getApproveCode();
             UserContactEntity userContact = contactService.getContact(request.getUserId());
@@ -91,6 +106,36 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
             }
         }
         responseObserver.onCompleted();
+    }
+
+    private CreateLeadResponse fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode errorCode,
+                                                           RuntimeException e) {
+        return CreateLeadResponse.newBuilder()
+                .setErrorResponse(CreateLeadResponse.ErrorResponse.newBuilder()
+                        .setErrorCode(errorCode)
+                        .setDescription(e.getMessage())
+                        .build())
+                .build();
+    }
+
+    private GetUserContactInfoResponse fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
+                                                                        RuntimeException e) {
+        return GetUserContactInfoResponse.newBuilder()
+                .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
+                        .setErrorCode(errorCode)
+                        .setDescription(e.getMessage())
+                        .build())
+                .build();
+    }
+
+    private static UpdateUserContactInfoResponse fillUpdateUserContactInfoError(UpdateUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
+                                                                                ContactNotFoundException e) {
+        return UpdateUserContactInfoResponse.newBuilder()
+                .setErrorResponse(UpdateUserContactInfoResponse.ErrorResponse.newBuilder()
+                        .setErrorCode(errorCode)
+                        .setDescription(e.getMessage())
+                        .build())
+                .build();
     }
 
 }

@@ -1,8 +1,10 @@
 package dev.crashteam.hermes.service.crm;
 
+import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,4 +23,7 @@ public interface CrmService {
     void verifyContact(String userId);
 
     void saveApproveCode(String approveCode);
+
+    @Transactional
+    CrmUserEntity findByUserId(String userId);
 }

@@ -1,5 +1,7 @@
 package dev.crashteam.hermes.service.lead;
 
+import dev.crashteam.hermes.exception.pipeline.PipelineIdNotFoundException;
+import dev.crashteam.hermes.exception.pipeline.PipelineStageNotFound;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
 import dev.crashteam.hermes.service.contact.ContactService;
@@ -23,8 +25,16 @@ public class LeadServiceImpl implements LeadService {
 
     @Override
     public void createLead(LeadRequest leadRequest) {
-        int pipelineId = pipelineService.getPipelines().getData().stream().findFirst().get().getId();
-        leadRequest.setPipelineId(pipelineId);
+        int pipelineId;
+        if (pipelineService.getPipelines().getData().stream().findFirst().isPresent()) {
+            pipelineId = pipelineService.getPipelines().getData().stream().findFirst().get().getId();
+            leadRequest.setPipelineId(pipelineId);
+            log.info("Received pipeline_id");
+        } else {
+            String pipelineIdNotFound = "Pipeline Id not found";
+            log.error(pipelineIdNotFound);
+            throw new PipelineIdNotFoundException(pipelineIdNotFound);
+        }
 
         Optional<PipelineStagesResponse.Stage> pipelineStage
                 = pipelineService.getPipelineStagesResponse(pipelineId).getData().stream().findFirst();
@@ -32,8 +42,11 @@ public class LeadServiceImpl implements LeadService {
         if (pipelineStage.isPresent()) {
             stageId = pipelineStage.get().getId();
             leadRequest.setStageId(stageId);
+            log.info("Received stage_id");
         } else {
-            log.error("stage_id not found");
+            String stageException = "Stages for pipeline with Id:[%s] not found".formatted(pipelineId);
+            log.error(stageException);
+            throw new PipelineStageNotFound(stageException);
         }
 
         Integer crmExternalId = contactService.createContact(List.of(leadRequest.getContact()));
