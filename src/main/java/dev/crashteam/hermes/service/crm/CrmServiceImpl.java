@@ -8,9 +8,10 @@ import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
+import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
+import dev.crashteam.hermes.model.dto.pipeline.PipelinesResponse;
 import dev.crashteam.hermes.repository.CrmRepository;
 import dev.crashteam.hermes.service.feign.OkoCrmClient;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,19 +25,30 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CrmServiceImpl implements CrmService {
+
+    public CrmServiceImpl(@Value("${app.integration.oko-crm.token}") String token, CrmRepository crmRepository, OkoCrmClient okoCrmClient) {
+        headers = Map.of(
+                "Accept", MediaType.APPLICATION_JSON_VALUE,
+                "Authorization", "Bearer " + token
+        );
+        this.crmRepository = crmRepository;
+        this.okoCrmClient = okoCrmClient;
+    }
 
     private final CrmRepository crmRepository;
     private final OkoCrmClient okoCrmClient;
+    private final Map<String, String> headers;
 
-    @Value("${app.integration.oko-crm.token}")
-    private String token;
+    @Override
+    public PipelinesResponse getPipelines() {
+        return okoCrmClient.getPipelines(headers);
+    }
 
-    private final Map<String, String> headers = Map.of(
-            "Accept", MediaType.APPLICATION_JSON_VALUE,
-            "Authorization", "Bearer " + token
-    );
+    @Override
+    public PipelineStagesResponse getPipelineStagesResponse(int pipelineId) {
+        return okoCrmClient.getPipelineStages(headers, pipelineId);
+    }
 
     @Override
     public Integer createContact(String firstName, long phone) {
@@ -53,13 +65,13 @@ public class CrmServiceImpl implements CrmService {
     @Transactional
     @Override
     public LeadResponse createLead(LeadRequest leadRequest, int crmExternalId) {
-        CrmUserEntity save;
-        try {
-            save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
-        } catch (DataIntegrityViolationException e) {
-            throw new LeadAlreadyExistsException("Lead already exist");
-        }
-        log.info("Created new lead:[{}]", save);
+//        CrmUserEntity save;
+//        try {
+//            save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
+//        } catch (DataIntegrityViolationException e) {
+//            throw new LeadAlreadyExistsException("Lead already exist");
+//        }
+//        log.info("Created new lead:[{}]", save);
         return okoCrmClient.createLead(headers, leadRequest);
     }
 
