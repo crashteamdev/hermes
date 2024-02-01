@@ -32,6 +32,7 @@ public class LeadRequest {
 
         private String name;
         private String phone;
+        private String email;
 
     }
 }

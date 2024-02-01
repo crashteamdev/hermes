@@ -17,8 +17,8 @@ public class ContactServiceImpl implements ContactService {
     private final CrmService crmService;
 
     @Override
-    public Integer createContact(String firstName, long phone) {
-        return crmService.createContact(firstName, phone);
+    public Integer createContact(String firstName, long phone, String email) {
+        return crmService.createContact(firstName, phone, email);
     }
 
     @Override

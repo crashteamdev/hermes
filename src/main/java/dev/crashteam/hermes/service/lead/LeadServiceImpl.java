@@ -45,7 +45,8 @@ public class LeadServiceImpl implements LeadService {
             throw new PipelineStageNotFound("Stages for pipeline with Id:[%s] not found".formatted(pipelineId));
         }
 
-        Integer crmExternalId = contactService.createContact(List.of(leadRequest.getContact()));
+        LeadRequest.Contact contact = leadRequest.getContact();
+        Integer crmExternalId = contactService.createContact(List.of(contact));
         crmService.createLead(leadRequest, crmExternalId);
     }
 
