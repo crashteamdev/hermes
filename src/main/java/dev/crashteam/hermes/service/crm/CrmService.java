@@ -16,7 +16,7 @@ public interface CrmService {
 
     PipelineStagesResponse getPipelineStagesResponse(int pipelineId);
 
-    Integer createContact(String firstName, long phone);
+    Integer createContact(String firstName, long phone, String email);
 
     Integer createContact(List<LeadRequest.Contact> contact);
 

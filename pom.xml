@@ -21,7 +21,7 @@
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <spring-retry.version>1.2.5.RELEASE</spring-retry.version>
-        <crm-proto.version>0.0.5</crm-proto.version>
+        <crm-proto.version>0.0.6</crm-proto.version>
         <grpc-server.version>2.14.0.RELEASE</grpc-server.version>
         <grpc-testing.version>1.53.0</grpc-testing.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>

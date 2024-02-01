@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ContactService {
 
-    Integer createContact(String firstName, long phone);
+    Integer createContact(String firstName, long phone, String email);
 
     Integer createContact(List<LeadRequest.Contact> contact);
 

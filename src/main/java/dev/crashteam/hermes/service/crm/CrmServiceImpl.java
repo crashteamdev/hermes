@@ -1,7 +1,6 @@
 package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.exception.ContactNotFoundException;
-import dev.crashteam.hermes.exception.LeadAlreadyExistsException;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
@@ -14,7 +13,6 @@ import dev.crashteam.hermes.repository.CrmRepository;
 import dev.crashteam.hermes.service.feign.OkoCrmClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,15 +49,16 @@ public class CrmServiceImpl implements CrmService {
     }
 
     @Override
-    public Integer createContact(String firstName, long phone) {
-        return okoCrmClient.createContact(headers, new ContactRequest(firstName, phone)).getId();
+    public Integer createContact(String firstName, long phone, String email) {
+        return okoCrmClient.createContact(headers, new ContactRequest(firstName, phone, email)).getId();
     }
 
     @Override
-    public Integer createContact(List<LeadRequest.Contact> contact) {
-        LeadRequest.Contact contactRequest = contact.stream().findFirst().get();
-        return okoCrmClient.createContact(headers, new ContactRequest(contactRequest.getName(),
-                Long.parseLong(contactRequest.getPhone()))).getId();
+    public Integer createContact(List<LeadRequest.Contact> contacts) {
+        LeadRequest.Contact contact = contacts.stream().findFirst().get();
+        ContactRequest contactRequest = new ContactRequest(contact.getName(),
+                Long.parseLong(contact.getPhone()), contact.getEmail());
+        return okoCrmClient.createContact(headers, contactRequest).getId();
     }
 
     @Transactional

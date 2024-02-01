@@ -13,9 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ContactRequest {
 
-    public ContactRequest(String firstName, long phone) {
+    public ContactRequest(String firstName, long phone, String email) {
         this.name = firstName;
         this.phones = List.of(new ContactPhone(String.valueOf(phone)));
+        this.emails = List.of(new ContactEmail(email));
     }
 
     private String name;

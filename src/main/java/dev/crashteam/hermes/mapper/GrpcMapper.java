@@ -15,7 +15,8 @@ public class GrpcMapper {
 
     public static LeadRequest map(CreateLeadRequest request) {
         LeadRequest.Contact contact
-                = new LeadRequest.Contact(request.getUserIdentity().getFirstName(), String.valueOf(request.getUserPhoneNumber().getPhoneNumber()));
+                = new LeadRequest.Contact(request.getUserIdentity().getFirstName(), String.valueOf(request.getUserPhoneNumber().getPhoneNumber()),
+                request.getEmail());
         return new LeadRequest("Демо", contact);
     }
 
