@@ -13,11 +13,28 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class GrpcMapper {
 
-    public static LeadRequest map(CreateLeadRequest request) {
-        LeadRequest.Contact contact
-                = new LeadRequest.Contact(request.getUserIdentity().getFirstName(), String.valueOf(request.getUserPhoneNumber().getPhoneNumber()),
-                request.getEmail());
-        return new LeadRequest("Демо", contact);
+    public static LeadRequest map(CreateLeadRequest.CreateDemoLead request) {
+        String firstName = request.getUserIdentity().getFirstName();
+        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String userEmail = request.getUserEmail();
+        LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+        return new LeadRequest(contact);
+    }
+
+    public static LeadRequest map(CreateLeadRequest.CreateServiceLead request) {
+        String firstName = request.getUserIdentity().getFirstName();
+        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String userEmail = request.getUserEmail();
+        LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+        return new LeadRequest(contact);
+    }
+
+    public static LeadRequest map(CreateLeadRequest.CreateFeedbackLead request) {
+        String firstName = request.getUserIdentity().getFirstName();
+        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String userEmail = request.getUserEmail();
+        LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+        return new LeadRequest(contact);
     }
 
     public static GetUserContactInfoResponse mapToUserContact(UserContactEntity userContact) {
@@ -53,5 +70,4 @@ public class GrpcMapper {
                 .setInn(userContact.getInn() != null ? userContact.getInn().toString() : "")
                 .build();
     }
-
 }

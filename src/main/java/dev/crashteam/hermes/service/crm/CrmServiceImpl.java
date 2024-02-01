@@ -4,12 +4,14 @@ import dev.crashteam.hermes.exception.ContactNotFoundException;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
+import dev.crashteam.hermes.model.domain.UserFeedbackEntity;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
 import dev.crashteam.hermes.model.dto.pipeline.PipelinesResponse;
 import dev.crashteam.hermes.repository.CrmRepository;
+import dev.crashteam.hermes.repository.UserFeedbackRepository;
 import dev.crashteam.hermes.service.feign.OkoCrmClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,17 +27,19 @@ import java.util.Optional;
 @Service
 public class CrmServiceImpl implements CrmService {
 
-    public CrmServiceImpl(@Value("${app.integration.oko-crm.token}") String token, CrmRepository crmRepository, OkoCrmClient okoCrmClient) {
+    public CrmServiceImpl(@Value("${app.integration.oko-crm.token}") String token, CrmRepository crmRepository, OkoCrmClient okoCrmClient, UserFeedbackRepository userFeedbackRepository) {
         headers = Map.of(
                 "Accept", MediaType.APPLICATION_JSON_VALUE,
                 "Authorization", "Bearer " + token
         );
         this.crmRepository = crmRepository;
         this.okoCrmClient = okoCrmClient;
+        this.userFeedbackRepository = userFeedbackRepository;
     }
 
     private final CrmRepository crmRepository;
     private final OkoCrmClient okoCrmClient;
+    private final UserFeedbackRepository userFeedbackRepository;
     private final Map<String, String> headers;
 
     @Override
@@ -63,15 +67,14 @@ public class CrmServiceImpl implements CrmService {
 
     @Transactional
     @Override
-    public LeadResponse createLead(LeadRequest leadRequest, int crmExternalId) {
-//        CrmUserEntity save;
-//        try {
-//            save = crmRepository.save(CrmMapper.mapLeadToCrm(leadRequest, crmExternalId));
-//        } catch (DataIntegrityViolationException e) {
-//            throw new LeadAlreadyExistsException("Lead already exist");
-//        }
-//        log.info("Created new lead:[{}]", save);
+    public LeadResponse createLead(LeadRequest leadRequest) {
         return okoCrmClient.createLead(headers, leadRequest);
+    }
+
+    @Transactional
+    @Override
+    public void saveFeedback(UserFeedbackEntity userFeedback) {
+        userFeedbackRepository.save(userFeedback);
     }
 
     @Transactional

@@ -33,8 +33,16 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     @Override
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
         try {
-            log.info("Start create lead");
-            leadService.createLead(GrpcMapper.map(request));
+            if (request.hasCreateDemoLead()) {
+                log.info("Start create demo lead");
+                leadService.createDemoLead(GrpcMapper.map(request.getCreateDemoLead()));
+            } else if (request.hasCreateFeedbackLead()) {
+                log.info("Start create feedback lead");
+                leadService.createFeedbackLead(GrpcMapper.map(request.getCreateFeedbackLead()));
+            } else if (request.hasCreateServiceLead()) {
+                log.info("Start create service lead");
+                leadService.createServiceLead(GrpcMapper.map(request.getCreateServiceLead()));
+            }
             responseObserver.onNext(CreateLeadResponse.newBuilder().build());
         } catch (LeadAlreadyExistsException e) {
             responseObserver.onNext(
@@ -43,6 +51,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
             responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
             log.error("Lead not created");
         }
+
         responseObserver.onCompleted();
         log.info("Done create lead");
     }

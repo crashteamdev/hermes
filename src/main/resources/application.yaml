@@ -3,6 +3,10 @@ app:
     oko-crm:
       url: https://api.okocrm.com/v2/
       token: 0510599d43fb005883494861667b8c8c:ea6cb0d691bf40cc82f976fe8d761efe
+      pipeline-id:
+        demo: 5545
+        feedback: 5543
+        service: 5684
     sms-aero:
       url: https://rns572@mail.ru:GYS6A6xfVA1-zV1TC1HJrQ8xeaPApHnI@gate.smsaero.ru/v2/
 
