@@ -12,7 +12,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LeadRequest {
 
+    public LeadRequest(Contact contact) {
+        this.contact = contact;
+    }
+
     public LeadRequest(String name, Contact contact) {
+        this.name = name;
+        this.contact = contact;
+    }
+
+    public LeadRequest(int pipelineId, String name, Contact contact) {
+        this.pipelineId = pipelineId;
         this.name = name;
         this.contact = contact;
     }

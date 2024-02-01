@@ -2,6 +2,7 @@ package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
+import dev.crashteam.hermes.model.domain.UserFeedbackEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadResponse;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
@@ -20,7 +21,9 @@ public interface CrmService {
 
     Integer createContact(List<LeadRequest.Contact> contact);
 
-    LeadResponse createLead(LeadRequest leadRequest, int crmExternalId);
+    LeadResponse createLead(LeadRequest leadRequest);
+
+    void saveFeedback(UserFeedbackEntity userFeedback);
 
     UserContactEntity getContact(String userId);
 

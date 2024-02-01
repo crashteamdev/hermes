@@ -4,6 +4,9 @@ import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 
 public interface LeadService {
 
-    void createLead(LeadRequest leadRequest);
+    void createDemoLead(LeadRequest leadRequest);
 
+    void createFeedbackLead(LeadRequest leadRequest);
+
+    void createServiceLead(LeadRequest leadRequest);
 }

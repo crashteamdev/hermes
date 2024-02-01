@@ -3,13 +3,9 @@ package dev.crashteam.hermes.service.pipeline;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
 import dev.crashteam.hermes.model.dto.pipeline.PipelinesResponse;
 import dev.crashteam.hermes.service.crm.CrmService;
-import dev.crashteam.hermes.service.feign.OkoCrmClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Slf4j
 @Service

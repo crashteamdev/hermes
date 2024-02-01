@@ -1,7 +1,8 @@
 package dev.crashteam.hermes.service.lead;
 
-import dev.crashteam.hermes.exception.pipeline.PipelineIdNotFoundException;
+import dev.crashteam.hermes.component.OkoProperties;
 import dev.crashteam.hermes.exception.pipeline.PipelineStageNotFound;
+import dev.crashteam.hermes.model.domain.UserFeedbackEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
 import dev.crashteam.hermes.service.contact.ContactService;
@@ -22,32 +23,56 @@ public class LeadServiceImpl implements LeadService {
     private final CrmService crmService;
     private final ContactService contactService;
     private final PipelineService pipelineService;
+    private final OkoProperties okoProperties;
 
     @Override
-    public void createLead(LeadRequest leadRequest) {
-        int pipelineId;
-        if (pipelineService.getPipelines().getData().stream().findFirst().isPresent()) {
-            pipelineId = pipelineService.getPipelines().getData().stream().findFirst().get().getId();
-            leadRequest.setPipelineId(pipelineId);
-            log.info("Received pipeline_id");
-        } else {
-            throw new PipelineIdNotFoundException("Pipeline Id not found");
-        }
+    public void createDemoLead(LeadRequest leadRequest) {
+        int pipelineId = okoProperties.getPipelineId().getDemo();
+        get(leadRequest, pipelineId);
+        leadRequest.setName("Демо %s".formatted(leadRequest.getContact().getEmail()));
 
+        LeadRequest.Contact contact = leadRequest.getContact();
+        Integer crmExternalId = contactService.createContact(List.of(contact));
+        crmService.createLead(leadRequest);
+    }
+
+    @Override
+    public void createFeedbackLead(LeadRequest leadRequest) {
+        int pipelineId = okoProperties.getPipelineId().getFeedback();
+        get(leadRequest, pipelineId);
+        leadRequest.setName("Обратная связь %s".formatted(leadRequest.getContact().getEmail()));
+
+        LeadRequest.Contact contact = leadRequest.getContact();
+        UserFeedbackEntity userFeedback = new UserFeedbackEntity();
+        userFeedback.setFirstName(contact.getName());
+        userFeedback.setPhone(Long.valueOf(contact.getPhone()));
+        userFeedback.setEmail(contact.getEmail());
+
+        crmService.saveFeedback(userFeedback);
+        crmService.createLead(leadRequest);
+    }
+
+    @Override
+    public void createServiceLead(LeadRequest leadRequest) {
+        int pipelineId = okoProperties.getPipelineId().getService();
+        get(leadRequest, pipelineId);
+        leadRequest.setName("Сервис %s".formatted(leadRequest.getContact().getEmail()));
+
+        crmService.createLead(leadRequest);
+    }
+
+    private void get(LeadRequest leadRequest, int pipelineId) {
         Optional<PipelineStagesResponse.Stage> pipelineStage
                 = pipelineService.getPipelineStagesResponse(pipelineId).getData().stream().findFirst();
         int stageId;
         if (pipelineStage.isPresent()) {
             stageId = pipelineStage.get().getId();
             leadRequest.setStageId(stageId);
+            leadRequest.setPipelineId(pipelineId);
             log.info("Received stage_id");
         } else {
-            throw new PipelineStageNotFound("Stages for pipeline with Id:[%s] not found".formatted(pipelineId));
+            throw new PipelineStageNotFound("Stages for pipeline_id:[%s] not found".formatted(pipelineId));
         }
-
-        LeadRequest.Contact contact = leadRequest.getContact();
-        Integer crmExternalId = contactService.createContact(List.of(contact));
-        crmService.createLead(leadRequest, crmExternalId);
     }
 
 }
