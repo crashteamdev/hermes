@@ -56,7 +56,7 @@ public class LeadServiceImpl implements LeadService {
     public void createServiceLead(LeadRequest leadRequest) {
         int pipelineId = okoProperties.getPipelineId().getService();
         get(leadRequest, pipelineId);
-        leadRequest.setName("Сервис %s".formatted(leadRequest.getContact().getEmail()));
+        leadRequest.setName(leadRequest.getName());
 
         crmService.createLead(leadRequest);
     }
