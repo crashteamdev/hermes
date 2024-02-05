@@ -22,11 +22,12 @@ public class GrpcMapper {
     }
 
     public static LeadRequest map(CreateLeadRequest.CreateServiceLead request) {
+        String serviceName = request.getServiceName();
         String firstName = request.getUserIdentity().getFirstName();
         String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
         String userEmail = request.getUserEmail();
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
-        return new LeadRequest(contact);
+        return new LeadRequest(serviceName, contact);
     }
 
     public static LeadRequest map(CreateLeadRequest.CreateFeedbackLead request) {
