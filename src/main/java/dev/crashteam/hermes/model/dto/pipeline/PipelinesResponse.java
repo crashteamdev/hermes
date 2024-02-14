@@ -17,7 +17,6 @@ public class PipelinesResponse {
         private int id;
         private String name;
 
-
     }
 
 }

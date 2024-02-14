@@ -4,6 +4,7 @@ import dev.crashteam.crm.CreateLeadRequest;
 import dev.crashteam.crm.GetUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoState;
+import dev.crashteam.crm.UserContact;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import lombok.experimental.UtilityClass;
@@ -15,7 +16,7 @@ public class GrpcMapper {
 
     public static LeadRequest map(CreateLeadRequest.CreateDemoLead request) {
         String firstName = request.getUserIdentity().getFirstName();
-        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
         return new LeadRequest(contact);
@@ -23,7 +24,7 @@ public class GrpcMapper {
 
     public static LeadRequest map(CreateLeadRequest.CreateServiceLead request) {
         String firstName = request.getUserIdentity().getFirstName();
-        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
         return new LeadRequest(contact);
@@ -31,7 +32,7 @@ public class GrpcMapper {
 
     public static LeadRequest map(CreateLeadRequest.CreateFeedbackLead request) {
         String firstName = request.getUserIdentity().getFirstName();
-        String phone = String.valueOf(request.getUserPhoneNumber().getPhoneNumber());
+        String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
         return new LeadRequest(contact);
@@ -63,11 +64,12 @@ public class GrpcMapper {
         return userContact;
     }
 
-    public static dev.crashteam.crm.UserContact map(UserContactEntity userContact) {
-        return dev.crashteam.crm.UserContact.newBuilder()
+    public static UserContact map(UserContactEntity userContact) {
+        return UserContact.newBuilder()
                 .setEmail(userContact.getEmail() != null ? userContact.getEmail() : "")
                 .setPhone(userContact.getPhone())
                 .setInn(userContact.getInn() != null ? userContact.getInn().toString() : "")
                 .build();
     }
+
 }
