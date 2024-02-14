@@ -1,6 +1,8 @@
 package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.exception.ContactNotFoundException;
+import dev.crashteam.hermes.exception.integration.crm.CreateContactException;
+import dev.crashteam.hermes.exception.integration.crm.CreateLeadException;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
@@ -8,7 +10,6 @@ import dev.crashteam.hermes.model.domain.UserFeedbackEntity;
 import dev.crashteam.hermes.model.dto.contact.ContactRequest;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import dev.crashteam.hermes.model.dto.pipeline.PipelineStagesResponse;
-import dev.crashteam.hermes.model.dto.pipeline.PipelinesResponse;
 import dev.crashteam.hermes.repository.CrmRepository;
 import dev.crashteam.hermes.repository.UserFeedbackRepository;
 import dev.crashteam.hermes.service.feign.OkoCrmClient;
@@ -40,26 +41,30 @@ public class CrmService {
     private final UserFeedbackRepository userFeedbackRepository;
     private final Map<String, String> headers;
 
-    public PipelinesResponse getPipelines() {
-        return okoCrmClient.getPipelines(headers);
-    }
-
     public PipelineStagesResponse getPipelineStagesResponse(int pipelineId) {
         return okoCrmClient.getPipelineStages(headers, pipelineId);
     }
 
     public Integer createContact(ContactRequest contactRequest) {
-        log.info("[Request] Create contact: [{}]", contactRequest);
-        Integer contactId = okoCrmClient.createContact(headers, contactRequest).getId();
-        log.info("[Response] Create contact: [{}]", contactId);
-        return contactId;
+        try {
+            log.info("[Request] Create contact: [{}]", contactRequest);
+            Integer contactId = okoCrmClient.createContact(headers, contactRequest).getId();
+            log.info("[Response] Create contact: [{}]", contactId);
+            return contactId;
+        } catch (Exception e) {
+            throw new CreateContactException("Create Contact ERROR: [%s]".formatted(e.getMessage()));
+        }
     }
 
     public Integer createLead(LeadRequest leadRequest) {
-        log.info("[Request] Create lead: [{}]", leadRequest);
-        int leadId = okoCrmClient.createLead(headers, leadRequest).getId();
-        log.info("[Response] Create lead: [{}]", leadId);
-        return leadId;
+        try {
+            log.info("[Request] Create lead: [{}]", leadRequest);
+            int leadId = okoCrmClient.createLead(headers, leadRequest).getId();
+            log.info("[Response] Create lead: [{}]", leadId);
+            return leadId;
+        } catch (Exception e) {
+            throw new CreateLeadException("Create Lead ERROR: [%s]".formatted(e.getMessage()));
+        }
     }
 
     @Transactional
