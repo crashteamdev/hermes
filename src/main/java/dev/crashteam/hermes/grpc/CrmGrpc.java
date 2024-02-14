@@ -10,6 +10,7 @@ import dev.crashteam.crm.UpdateUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoState;
 import dev.crashteam.hermes.exception.ContactNotFoundException;
 import dev.crashteam.hermes.exception.LeadAlreadyExistsException;
+import dev.crashteam.hermes.exception.integration.crm.CrmIntegrationException;
 import dev.crashteam.hermes.exception.pipeline.PipelineException;
 import dev.crashteam.hermes.mapper.GrpcMapper;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
@@ -34,26 +35,26 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
         try {
             if (request.hasCreateDemoLead()) {
-                log.info("Start create demo lead");
+                log.info("Start create DEMO Lead");
                 leadService.createDemoLead(GrpcMapper.map(request.getCreateDemoLead()));
             } else if (request.hasCreateFeedbackLead()) {
-                log.info("Start create feedback lead");
+                log.info("Start create FEEDBACK Lead");
                 leadService.createFeedbackLead(GrpcMapper.map(request.getCreateFeedbackLead()));
             } else if (request.hasCreateServiceLead()) {
-                log.info("Start create service lead");
+                log.info("Start create SERVICE Lead");
                 leadService.createServiceLead(GrpcMapper.map(request.getCreateServiceLead()));
             }
             responseObserver.onNext(CreateLeadResponse.newBuilder().build());
         } catch (LeadAlreadyExistsException e) {
             responseObserver.onNext(
                     fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));
-        } catch (PipelineException e) {
+        } catch (PipelineException | CrmIntegrationException e) {
             responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
-            log.error("Lead not created");
+            log.error("Lead not created: [{}]", e.getMessage());
         }
 
         responseObserver.onCompleted();
-        log.info("Done create lead");
+        log.info("Done create Lead");
     }
 
     @Override
@@ -119,7 +120,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     }
 
     private CreateLeadResponse fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode errorCode,
-                                                           RuntimeException e) {
+                                                           Exception e) {
         return CreateLeadResponse.newBuilder()
                 .setErrorResponse(CreateLeadResponse.ErrorResponse.newBuilder()
                         .setErrorCode(errorCode)
@@ -129,7 +130,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     }
 
     private GetUserContactInfoResponse fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
-                                                                        RuntimeException e) {
+                                                                        Exception e) {
         return GetUserContactInfoResponse.newBuilder()
                 .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
                         .setErrorCode(errorCode)
