@@ -9,8 +9,6 @@ import lombok.Data;
 public class LeadResponse {
 
     @JsonProperty("lead_id")
-    private int leadId;
-    @JsonProperty("contact_id")
-    private int contactId;
+    private int id;
 
 }
