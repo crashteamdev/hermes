@@ -14,29 +14,34 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class GrpcMapper {
 
-    public static LeadRequest map(CreateLeadRequest.CreateDemoLead request) {
+    public static LeadRequest mapDemoLead(CreateLeadRequest.CreateDemoLead request) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+        String telegramUsername = request.getTelegramUsername();
+        String leadName = "Демо | %s | %s".formatted(userEmail, telegramUsername);
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
-        return new LeadRequest(contact);
+        return new LeadRequest(leadName, contact);
     }
 
-    public static LeadRequest map(CreateLeadRequest.CreateServiceLead request) {
-        String serviceName = request.getServiceName();
+    public static LeadRequest mapServiceLead(CreateLeadRequest.CreateServiceLead request) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+        String telegramUsername = request.getTelegramUsername();
+        String serviceName = "Сервис | '%s' | %s | %s".formatted(request.getServiceName(), userEmail, telegramUsername);
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
         return new LeadRequest(serviceName, contact);
     }
 
-    public static LeadRequest map(CreateLeadRequest.CreateFeedbackLead request) {
+    public static LeadRequest mapFeedbackLead(CreateLeadRequest.CreateFeedbackLead request) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+        String telegramUsername = request.getTelegramUsername();
+        String leadName = "Обратная связь | %s | %s".formatted(userEmail, telegramUsername);
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
-        return new LeadRequest(contact);
+        return new LeadRequest(leadName, contact);
     }
 
     public static GetUserContactInfoResponse mapToUserContact(UserContactEntity userContact) {

@@ -32,7 +32,6 @@ public class LeadService {
         log.info("Lead: [{}]", leadRequest);
         int pipelineId = okoProperties.getPipelineId().getDemo();
         fillStageId(leadRequest, pipelineId);
-        leadRequest.setName("Демо %s".formatted(leadRequest.getContact().getEmail()));
 
         LeadRequest.Contact contact = leadRequest.getContact();
         contactService.createContact(contact);
@@ -42,7 +41,6 @@ public class LeadService {
     public void createFeedbackLead(LeadRequest leadRequest) {
         int pipelineId = okoProperties.getPipelineId().getFeedback();
         fillStageId(leadRequest, pipelineId);
-        leadRequest.setName("Обратная связь %s".formatted(leadRequest.getContact().getEmail()));
 
         LeadRequest.Contact contact = leadRequest.getContact();
         UserFeedbackEntity userFeedback = new UserFeedbackEntity();
@@ -57,7 +55,6 @@ public class LeadService {
     public void createServiceLead(LeadRequest leadRequest) {
         int pipelineId = okoProperties.getPipelineId().getService();
         fillStageId(leadRequest, pipelineId);
-        leadRequest.setName("Сервис %s".formatted(leadRequest.getContact().getEmail()));
 
         createLead(leadRequest);
     }
