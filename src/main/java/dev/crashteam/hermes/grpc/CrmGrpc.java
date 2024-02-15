@@ -36,13 +36,13 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
         try {
             if (request.hasCreateDemoLead()) {
                 log.info("Start create DEMO Lead");
-                leadService.createDemoLead(GrpcMapper.map(request.getCreateDemoLead()));
+                leadService.createDemoLead(GrpcMapper.mapDemoLead(request.getCreateDemoLead()));
             } else if (request.hasCreateFeedbackLead()) {
                 log.info("Start create FEEDBACK Lead");
-                leadService.createFeedbackLead(GrpcMapper.map(request.getCreateFeedbackLead()));
+                leadService.createFeedbackLead(GrpcMapper.mapFeedbackLead(request.getCreateFeedbackLead()));
             } else if (request.hasCreateServiceLead()) {
                 log.info("Start create SERVICE Lead");
-                leadService.createServiceLead(GrpcMapper.map(request.getCreateServiceLead()));
+                leadService.createServiceLead(GrpcMapper.mapServiceLead(request.getCreateServiceLead()));
             }
             responseObserver.onNext(CreateLeadResponse.newBuilder().build());
         } catch (LeadAlreadyExistsException e) {
