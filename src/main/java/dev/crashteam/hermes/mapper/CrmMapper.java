@@ -1,7 +1,9 @@
 package dev.crashteam.hermes.mapper;
 
-import dev.crashteam.hermes.model.domain.UserContactEntity;
+import dev.crashteam.crm.CreateLeadRequest;
+import dev.crashteam.hermes.model.UtmTag;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
+import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,16 @@ public class CrmMapper {
             crm.setInn(userContact.getInn());
         }
         return crm;
+    }
+
+    public static UtmTag mapUtmToCrm(CreateLeadRequest.UtmTag grpcUtmTag) {
+        UtmTag utmTag = new UtmTag();
+        utmTag.setCampaign(grpcUtmTag.getUtmCampaign());
+        utmTag.setTerm(grpcUtmTag.getUtmTerm());
+        utmTag.setContent(grpcUtmTag.getUtmContent());
+        utmTag.setSource(grpcUtmTag.getUtmSource());
+        utmTag.setMedium(grpcUtmTag.getUtmMedium());
+        return utmTag;
     }
 
 }
