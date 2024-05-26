@@ -5,6 +5,7 @@ import dev.crashteam.crm.GetUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoState;
 import dev.crashteam.crm.UserContact;
+import dev.crashteam.hermes.model.UtmTag;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
 import lombok.experimental.UtilityClass;
@@ -14,33 +15,57 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class GrpcMapper {
 
-    public static LeadRequest mapDemoLead(CreateLeadRequest.CreateDemoLead request) {
+    public static LeadRequest mapDemoLead(CreateLeadRequest.CreateDemoLead request, CreateLeadRequest.UtmTag grpcUtmTag) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+
         String telegramUsername = request.getTelegramUsername();
         String leadName = "Демо | %s | %s".formatted(userEmail, telegramUsername);
+
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+
+        if (grpcUtmTag != null) {
+            UtmTag utmTag = CrmMapper.mapUtmToCrm(grpcUtmTag);
+            return new LeadRequest(leadName, contact, utmTag);
+        }
+
         return new LeadRequest(leadName, contact);
     }
 
-    public static LeadRequest mapServiceLead(CreateLeadRequest.CreateServiceLead request) {
+    public static LeadRequest mapServiceLead(CreateLeadRequest.CreateServiceLead request, CreateLeadRequest.UtmTag grpcUtmTag) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+
         String telegramUsername = request.getTelegramUsername();
         String serviceName = "Сервис | '%s' | %s | %s".formatted(request.getServiceName(), userEmail, telegramUsername);
+
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+
+        if (grpcUtmTag != null) {
+            UtmTag utmTag = CrmMapper.mapUtmToCrm(grpcUtmTag);
+            return new LeadRequest(serviceName, contact, utmTag);
+        }
+
         return new LeadRequest(serviceName, contact);
     }
 
-    public static LeadRequest mapFeedbackLead(CreateLeadRequest.CreateFeedbackLead request) {
+    public static LeadRequest mapFeedbackLead(CreateLeadRequest.CreateFeedbackLead request, CreateLeadRequest.UtmTag grpcUtmTag) {
         String firstName = request.getUserIdentity().getFirstName();
         String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
         String userEmail = request.getUserEmail();
+
         String telegramUsername = request.getTelegramUsername();
         String leadName = "Обратная связь | %s | %s".formatted(userEmail, telegramUsername);
+
         LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+
+        if (grpcUtmTag != null) {
+            UtmTag utmTag = CrmMapper.mapUtmToCrm(grpcUtmTag);
+            return new LeadRequest(leadName, contact, utmTag);
+        }
+
         return new LeadRequest(leadName, contact);
     }
 
