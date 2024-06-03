@@ -9,7 +9,6 @@ import dev.crashteam.crm.UpdateUserContactInfoRequest;
 import dev.crashteam.crm.UpdateUserContactInfoResponse;
 import dev.crashteam.crm.UpdateUserContactInfoState;
 import dev.crashteam.hermes.exception.ContactNotFoundException;
-import dev.crashteam.hermes.exception.LeadAlreadyExistsException;
 import dev.crashteam.hermes.exception.integration.crm.CrmIntegrationException;
 import dev.crashteam.hermes.exception.pipeline.PipelineException;
 import dev.crashteam.hermes.mapper.GrpcMapper;
@@ -46,9 +45,9 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                 leadService.createServiceLead(GrpcMapper.mapServiceLead(request.getCreateServiceLead(), utmTag));
             }
             responseObserver.onNext(CreateLeadResponse.newBuilder().build());
-        } catch (LeadAlreadyExistsException e) {
+        /*} catch (LeadAlreadyExistsException e) {
             responseObserver.onNext(
-                    fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));
+                    fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));*/
         } catch (PipelineException | CrmIntegrationException e) {
             responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
             log.error("Lead not created: [{}]", e.getMessage());

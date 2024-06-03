@@ -1,7 +1,6 @@
 package dev.crashteam.hermes.service.crm;
 
 import dev.crashteam.hermes.exception.ContactNotFoundException;
-import dev.crashteam.hermes.exception.integration.crm.CreateContactException;
 import dev.crashteam.hermes.exception.integration.crm.CreateLeadException;
 import dev.crashteam.hermes.mapper.CrmMapper;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
@@ -19,8 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 @Slf4j
 @Service
@@ -52,8 +54,17 @@ public class CrmService {
             log.info("[Response] Create contact: [{}]", contactId);
             return contactId;
         } catch (Exception e) {
-            throw new CreateContactException("Create Contact ERROR: [%s]".formatted(e.getMessage()));
+            Properties properties = new Properties();
+            try {
+                properties.load(new StringReader("Create Contact ERROR: [%s]".formatted(e.getMessage())));
+            } catch (IOException ex) {
+                log.warn(e.getMessage());
+            }
+            log.warn(properties.getProperty("Create"));
+//            throw new CreateContactException("Create Contact ERROR: [%s]".formatted(e.getMessage()));
         }
+
+        return -1;
     }
 
     public Integer createLead(LeadRequest leadRequest) {
