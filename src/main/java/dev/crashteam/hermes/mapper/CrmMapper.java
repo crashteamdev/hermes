@@ -1,6 +1,7 @@
 package dev.crashteam.hermes.mapper;
 
 import dev.crashteam.crm.CreateLeadRequest;
+import dev.crashteam.crm.RequestDemoAccess;
 import dev.crashteam.hermes.model.UtmTag;
 import dev.crashteam.hermes.model.domain.CrmUserEntity;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
@@ -56,6 +57,16 @@ public class CrmMapper {
     }
 
     public static UtmTag mapUtmToCrm(CreateLeadRequest.UtmTag grpcUtmTag) {
+        UtmTag utmTag = new UtmTag();
+        utmTag.setCampaign(grpcUtmTag.getUtmCampaign());
+        utmTag.setTerm(grpcUtmTag.getUtmTerm());
+        utmTag.setContent(grpcUtmTag.getUtmContent());
+        utmTag.setSource(grpcUtmTag.getUtmSource());
+        utmTag.setMedium(grpcUtmTag.getUtmMedium());
+        return utmTag;
+    }
+
+    public static UtmTag mapUtmToCrm(RequestDemoAccess.UtmTag grpcUtmTag) {
         UtmTag utmTag = new UtmTag();
         utmTag.setCampaign(grpcUtmTag.getUtmCampaign());
         utmTag.setTerm(grpcUtmTag.getUtmTerm());

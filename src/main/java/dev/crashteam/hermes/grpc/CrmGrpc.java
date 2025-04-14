@@ -1,20 +1,16 @@
 package dev.crashteam.hermes.grpc;
 
-import dev.crashteam.crm.CreateLeadRequest;
-import dev.crashteam.crm.CreateLeadResponse;
-import dev.crashteam.crm.CrmServiceGrpc;
-import dev.crashteam.crm.GetUserContactInfoRequest;
-import dev.crashteam.crm.GetUserContactInfoResponse;
-import dev.crashteam.crm.UpdateUserContactInfoRequest;
-import dev.crashteam.crm.UpdateUserContactInfoResponse;
-import dev.crashteam.crm.UpdateUserContactInfoState;
+import dev.crashteam.crm.*;
 import dev.crashteam.hermes.exception.ContactNotFoundException;
 import dev.crashteam.hermes.exception.LeadAlreadyExistsException;
 import dev.crashteam.hermes.exception.integration.crm.CrmIntegrationException;
 import dev.crashteam.hermes.exception.pipeline.PipelineException;
 import dev.crashteam.hermes.mapper.GrpcMapper;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
+import dev.crashteam.hermes.model.dto.lead.LeadRequest;
+import dev.crashteam.hermes.service.analytics.KeAnalyticsService;
 import dev.crashteam.hermes.service.contact.ContactService;
+import dev.crashteam.hermes.service.demo.DemoAccessService;
 import dev.crashteam.hermes.service.lead.LeadService;
 import dev.crashteam.hermes.service.sms.SmsService;
 import io.grpc.stub.StreamObserver;
@@ -30,6 +26,8 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     private final LeadService leadService;
     private final ContactService contactService;
     private final SmsService smsService;
+    private final DemoAccessService demoAccessService;
+    private final KeAnalyticsService keAnalyticsService;
 
     @Override
     public void createLead(CreateLeadRequest request, StreamObserver<CreateLeadResponse> responseObserver) {
@@ -68,12 +66,12 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
             responseObserver.onNext(
                     fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_NOT_FOUND, e));
             log.error("Contact not created\n" +
-                      "Stack trace: %s".formatted(e));
+                    "Stack trace: %s".formatted(e));
         } catch (RuntimeException e) {
             responseObserver.onNext(
                     fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
             log.error("Contact not created\n" +
-                      "Stack trace: %s".formatted(e));
+                    "Stack trace: %s".formatted(e));
         }
         responseObserver.onCompleted();
     }
@@ -118,6 +116,46 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
             }
         }
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void requestDemoAccess(RequestDemoAccess request, StreamObserver<RequestDemoAccessResponse> responseObserver) {
+        LeadRequest leadRequest = GrpcMapper.mapDemoLead(request);
+        leadService.createDemoLead(leadRequest);
+        try {
+            String demoToken = demoAccessService.createDemoAccess(request.getGeneralUserId());
+            responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
+                    .setSuccessResponse(
+                            RequestDemoAccessResponse.SuccessResponse.newBuilder()
+                                    .setDemoAccessToken(demoToken)
+                                    .build())
+                    .build());
+        } catch (Exception ex) {
+            responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
+                    .setErrorResponse(RequestDemoAccessResponse.ErrorResponse.newBuilder()
+                            .setErrorCode(RequestDemoAccessResponse.ErrorResponse.ErrorCode.ERROR_CODE_DUPLICATE)
+                            .build())
+                    .build());
+        } finally {
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
+    public void checkDemoToken(CheckDemoTokenRequest request, StreamObserver<CheckDemoTokenResponse> responseObserver) {
+        boolean isDemoAccess = demoAccessService.giveDemoByToken(request.getDemoAccessToken());
+        if (isDemoAccess) {
+            responseObserver.onNext(CheckDemoTokenResponse.newBuilder().setSuccessResponse(
+                            CheckDemoTokenResponse.SuccessResponse.newBuilder().build())
+                    .build());
+        } else {
+            responseObserver.onNext(CheckDemoTokenResponse.newBuilder()
+                    .setErrorResponse(
+                            CheckDemoTokenResponse.ErrorResponse.newBuilder()
+                                    .setErrorCode(CheckDemoTokenResponse.ErrorResponse.ErrorCode.ERROR_CODE_INVALID)
+                                    .build())
+                    .build());
+        }
     }
 
     private CreateLeadResponse fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode errorCode,

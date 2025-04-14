@@ -21,7 +21,7 @@
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <spring-retry.version>1.2.5.RELEASE</spring-retry.version>
-        <crm-proto.version>0.0.10</crm-proto.version>
+        <crm-proto.version>0.0.13</crm-proto.version>
         <grpc-server.version>2.14.0.RELEASE</grpc-server.version>
         <grpc-testing.version>1.53.0</grpc-testing.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
@@ -82,6 +82,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-testing</artifactId>
             <version>${grpc-testing.version}</version>
@@ -110,6 +116,12 @@
             <groupId>dev.crashteam</groupId>
             <artifactId>crm-proto</artifactId>
             <version>${crm-proto.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.crashteam</groupId>
+            <artifactId>analytics-proto</artifactId>
+            <version>0.0.18</version>
         </dependency>
 
         <dependency>

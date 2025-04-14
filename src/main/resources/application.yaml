@@ -22,3 +22,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/main.xml
     enabled: true
+
+grpc:
+  client:
+    keAnalyticsService.address: static://localhost:9090
