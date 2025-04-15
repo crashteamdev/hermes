@@ -147,7 +147,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
 
     @Override
     public void checkDemoToken(CheckDemoTokenRequest request, StreamObserver<CheckDemoTokenResponse> responseObserver) {
-        boolean isDemoAccess = demoAccessService.giveDemoByToken(request.getDemoAccessToken());
+        boolean isDemoAccess = demoAccessService.giveDemoByToken(request.getGeneralUserId(), request.getDemoAccessToken());
         if (isDemoAccess) {
             responseObserver.onNext(CheckDemoTokenResponse.newBuilder().setSuccessResponse(
                             CheckDemoTokenResponse.SuccessResponse.newBuilder().build())

@@ -31,11 +31,11 @@ public class DemoAccessService {
         return token;
     }
 
-    public boolean giveDemoByToken(String token) {
+    public boolean giveDemoByToken(String userId, String token) {
         DemoAccessRequestEntity demoAccessRequestEntity = demoAccessRepository.findByToken(token);
         if (demoAccessRequestEntity != null && !demoAccessRequestEntity.getIsUsed()) {
             boolean isDemoAccess = keAnalyticsService.giveSubscription(
-                    demoAccessRequestEntity.getUserIdentity(), "demo", 3);
+                    userId, "demo", 3);
             if (isDemoAccess) {
                 demoAccessRepository.markAsUsedByToken(token);
             }
