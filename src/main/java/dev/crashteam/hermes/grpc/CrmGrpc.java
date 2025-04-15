@@ -122,8 +122,12 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     public void requestDemoAccess(RequestDemoAccess request, StreamObserver<RequestDemoAccessResponse> responseObserver) {
         LeadRequest leadRequest = GrpcMapper.mapDemoLead(request);
         leadService.createDemoLead(leadRequest);
+        String userId = request.getTelegramUsername();
+        if (userId.isEmpty()) {
+            userId = request.getUserEmail();
+        }
         try {
-            String demoToken = demoAccessService.createDemoAccess(request.getGeneralUserId());
+            String demoToken = demoAccessService.createDemoAccess(userId);
             responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
                     .setSuccessResponse(
                             RequestDemoAccessResponse.SuccessResponse.newBuilder()
