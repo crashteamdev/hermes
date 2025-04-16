@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="addDemoAccessTable" author="Vitaliy">
+
+        <createTable tableName="demo_access_request">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="da_pkey"/>
+            </column>
+            <column name="user_identity" type="VARCHAR">
+                <constraints unique="true"/>
+            </column>
+            <column name="token" type="VARCHAR"/>
+            <column name="is_used" type="VARCHAR"/>
+        </createTable>
+
+        <createSequence sequenceName="da_id_seq" startValue="1" incrementBy="1"/>
+
+        <createIndex indexName="idx_demo_access_request_token" tableName="demo_access_request">
+            <column name="token"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>

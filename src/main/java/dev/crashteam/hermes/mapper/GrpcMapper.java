@@ -1,10 +1,6 @@
 package dev.crashteam.hermes.mapper;
 
-import dev.crashteam.crm.CreateLeadRequest;
-import dev.crashteam.crm.GetUserContactInfoResponse;
-import dev.crashteam.crm.UpdateUserContactInfoRequest;
-import dev.crashteam.crm.UpdateUserContactInfoState;
-import dev.crashteam.crm.UserContact;
+import dev.crashteam.crm.*;
 import dev.crashteam.hermes.model.UtmTag;
 import dev.crashteam.hermes.model.domain.UserContactEntity;
 import dev.crashteam.hermes.model.dto.lead.LeadRequest;
@@ -27,6 +23,24 @@ public class GrpcMapper {
 
         if (grpcUtmTag != null) {
             UtmTag utmTag = CrmMapper.mapUtmToCrm(grpcUtmTag);
+            return new LeadRequest(leadName, contact, utmTag);
+        }
+
+        return new LeadRequest(leadName, contact);
+    }
+
+    public static LeadRequest mapDemoLead(RequestDemoAccess request) {
+        String firstName = request.getUserIdentity().getFirstName();
+        String phone = "+" + request.getUserPhoneNumber().getPhoneNumber();
+        String userEmail = request.getUserEmail();
+
+        String telegramUsername = request.getTelegramUsername();
+        String leadName = "[TG-BOT] Демо | %s | %s".formatted(userEmail, telegramUsername);
+
+        LeadRequest.Contact contact = new LeadRequest.Contact(firstName, phone, userEmail);
+
+        if (request.hasUtmTag()) {
+            UtmTag utmTag = CrmMapper.mapUtmToCrm(request.getUtmTag());
             return new LeadRequest(leadName, contact, utmTag);
         }
 
