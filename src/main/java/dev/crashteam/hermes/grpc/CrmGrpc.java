@@ -47,7 +47,15 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
         } catch (LeadAlreadyExistsException e) {
             responseObserver.onNext(
                     fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));
-        } catch (PipelineException | CrmIntegrationException e) {
+        } catch (CrmIntegrationException e) {
+            if (e.getMessage().contains("422") && e.getMessage().contains("уже занято")) {
+                responseObserver.onNext(
+                        fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_USER_LEAD_ALREADY_EXISTS, e));
+            } else {
+                responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
+            }
+            log.error("Lead not created: [{}]", e.getMessage());
+        } catch (PipelineException e) {
             responseObserver.onNext(fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN, e));
             log.error("Lead not created: [{}]", e.getMessage());
         }
