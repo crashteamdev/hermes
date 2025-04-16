@@ -129,7 +129,22 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     @Override
     public void requestDemoAccess(RequestDemoAccess request, StreamObserver<RequestDemoAccessResponse> responseObserver) {
         LeadRequest leadRequest = GrpcMapper.mapDemoLead(request);
-        leadService.createDemoLead(leadRequest);
+        try {
+            leadService.createDemoLead(leadRequest);
+        } catch (CrmIntegrationException e) {
+            if (e.getMessage().contains("422") && e.getMessage().contains("уже занято")) {
+                // ignore
+            } else {
+                log.error("Failed to create demo lead to demo access", e);
+                responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
+                        .setErrorResponse(RequestDemoAccessResponse.ErrorResponse.newBuilder()
+                                .setErrorCode(RequestDemoAccessResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN)
+                                .build())
+                        .build());
+                responseObserver.onCompleted();
+                return;
+            }
+        }
         String userId = request.getTelegramUsername();
         if (userId.isEmpty()) {
             userId = request.getUserEmail();
@@ -154,7 +169,8 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
     }
 
     @Override
-    public void checkDemoToken(CheckDemoTokenRequest request, StreamObserver<CheckDemoTokenResponse> responseObserver) {
+    public void checkDemoToken(CheckDemoTokenRequest
+                                       request, StreamObserver<CheckDemoTokenResponse> responseObserver) {
         boolean isDemoAccess = demoAccessService.giveDemoByToken(request.getGeneralUserId(), request.getDemoAccessToken());
         if (isDemoAccess) {
             responseObserver.onNext(CheckDemoTokenResponse.newBuilder().setSuccessResponse(
@@ -180,8 +196,9 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                 .build();
     }
 
-    private GetUserContactInfoResponse fillUserContactInfoResponseError(GetUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
-                                                                        Exception e) {
+    private GetUserContactInfoResponse fillUserContactInfoResponseError
+            (GetUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
+             Exception e) {
         return GetUserContactInfoResponse.newBuilder()
                 .setErrorResponse(GetUserContactInfoResponse.ErrorResponse.newBuilder()
                         .setErrorCode(errorCode)
@@ -190,8 +207,9 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                 .build();
     }
 
-    private static UpdateUserContactInfoResponse fillUpdateUserContactInfoError(UpdateUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
-                                                                                ContactNotFoundException e) {
+    private static UpdateUserContactInfoResponse fillUpdateUserContactInfoError
+            (UpdateUserContactInfoResponse.ErrorResponse.ErrorCode errorCode,
+             ContactNotFoundException e) {
         return UpdateUserContactInfoResponse.newBuilder()
                 .setErrorResponse(UpdateUserContactInfoResponse.ErrorResponse.newBuilder()
                         .setErrorCode(errorCode)
