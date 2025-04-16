@@ -22,7 +22,7 @@
         <spring-cloud.version>2023.0.5</spring-cloud.version>
         <spring-retry.version>1.2.5.RELEASE</spring-retry.version>
         <crm-proto.version>0.0.14</crm-proto.version>
-        <grpc-server.version>2.14.0.RELEASE</grpc-server.version>
+        <grpc-server.version>3.1.0.RELEASE</grpc-server.version>
         <grpc-testing.version>1.53.0</grpc-testing.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <projectreactor.core.version>3.6.2</projectreactor.core.version>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>net.devh</groupId>
             <artifactId>grpc-client-spring-boot-starter</artifactId>
-            <version>3.1.0.RELEASE</version>
+            <version>${grpc-server.version}</version>
         </dependency>
 
         <dependency>
