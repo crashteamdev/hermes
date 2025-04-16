@@ -131,19 +131,9 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
         LeadRequest leadRequest = GrpcMapper.mapDemoLead(request);
         try {
             leadService.createDemoLead(leadRequest);
-        } catch (CrmIntegrationException e) {
-            if (e.getMessage().contains("422") && e.getMessage().contains("уже занято")) {
-                // ignore
-            } else {
-                log.error("Failed to create demo lead to demo access", e);
-                responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
-                        .setErrorResponse(RequestDemoAccessResponse.ErrorResponse.newBuilder()
-                                .setErrorCode(RequestDemoAccessResponse.ErrorResponse.ErrorCode.ERROR_CODE_UNKNOWN)
-                                .build())
-                        .build());
-                responseObserver.onCompleted();
-                return;
-            }
+        } catch (Exception e) {
+            // Ignore error
+            log.warn("Failed to create demo lead", e);
         }
         String userId = request.getTelegramUsername();
         if (userId.isEmpty()) {
