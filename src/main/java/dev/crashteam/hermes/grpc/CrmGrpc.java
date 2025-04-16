@@ -135,10 +135,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
             // Ignore error
             log.warn("Failed to create demo lead", e);
         }
-        String userId = request.getTelegramUsername();
-        if (userId.isEmpty()) {
-            userId = request.getUserEmail();
-        }
+        String userId = request.getGeneralUserId();
         try {
             String demoToken = demoAccessService.createDemoAccess(userId);
             responseObserver.onNext(RequestDemoAccessResponse.newBuilder()
