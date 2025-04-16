@@ -14,7 +14,7 @@
             <column name="user_identity" type="VARCHAR">
                 <constraints unique="true"/>
             </column>
-            <column name="token" type="BIGINT"/>
+            <column name="token" type="VARCHAR"/>
             <column name="is_used" type="VARCHAR"/>
         </createTable>
 
