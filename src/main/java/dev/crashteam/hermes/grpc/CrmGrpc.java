@@ -171,6 +171,7 @@ public class CrmGrpc extends CrmServiceGrpc.CrmServiceImplBase {
                                     .build())
                     .build());
         }
+        responseObserver.onCompleted();
     }
 
     private CreateLeadResponse fillCreateLeadResponseError(CreateLeadResponse.ErrorResponse.ErrorCode errorCode,
